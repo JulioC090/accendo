@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-console.log('app-template CLI');
+console.log('{{projectName}} CLI');

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "electron-react-app",
+  "name": "Electron React App",
+  "description": "Electron, React, Vite, TypeScript, and Tailwind CSS starter.",
+  "prompts": [
+    {
+      "name": "projectName",
+      "type": "input",
+      "message": "Project name",
+      "default": "my-electron-app",
+      "required": true,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    {
+      "name": "productName",
+      "type": "input",
+      "message": "Product name",
+      "default": "My Electron App",
+      "required": true
+    },
+    {
+      "name": "description",
+      "type": "input",
+      "message": "Project description",
+      "default": "An Electron application",
+      "required": true
+    }
+  ]
+}

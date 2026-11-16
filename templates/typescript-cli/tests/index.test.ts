@@ -9,5 +9,5 @@ test('prints the application name', async () => {
 
   await import('../src/index.js');
 
-  expect(log).toHaveBeenCalledWith('app-template CLI');
+  expect(log).toHaveBeenCalledWith('{{projectName}} CLI');
 });
