@@ -7,8 +7,11 @@ export type PromptDefinition = {
   pattern?: string;
 };
 
+export type TemplateRenderer = 'simple' | 'handlebars';
+
 export type TemplateManifest = {
   schemaVersion: 1;
+  renderer?: TemplateRenderer;
   id: string;
   name: string;
   description: string;

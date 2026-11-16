@@ -91,7 +91,7 @@ export async function createProject(
     await prepareDestination(destination);
 
     try {
-      await renderTemplate(directory, destination, answers);
+      await renderTemplate(directory, destination, answers, manifest.renderer);
     } catch (error) {
       await cleanDestination(destination);
       throw error;

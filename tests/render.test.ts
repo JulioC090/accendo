@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, expect, test } from 'vitest';
 import { renderTemplate } from '../src/template/render.js';
+import { loadManifest } from '../src/template/config.js';
 
 const temporaryDirectories: string[] = [];
 
@@ -41,6 +42,73 @@ test('renders text files and names while preserving binary files', async () => {
   expect(await readFile(path.join(destination, 'asset.bin'))).toEqual(
     Buffer.from([0, 255, 1]),
   );
+});
+
+test.each([
+  [true, 'Hello from the Handlebars example!'],
+  [false, 'The greeting was disabled for this project.'],
+])(
+  'renders the Handlebars example when includeGreeting is %s',
+  async (includeGreeting, expected) => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'accendo-hbs-example-'));
+    temporaryDirectories.push(root);
+    const source = new URL('../templates/handlebars-example/', import.meta.url)
+      .pathname;
+    const destination = path.join(root, 'output');
+    const manifest = await loadManifest(path.join(source, 'template.json'));
+    await renderTemplate(
+      source,
+      destination,
+      { projectName: 'example-project', includeGreeting },
+      manifest.renderer,
+    );
+
+    const output = await readFile(path.join(destination, 'README.md'), 'utf8');
+    expect(output).toContain('# example-project');
+    expect(output).toContain(expected);
+    expect(output).not.toContain('{{#if');
+  },
+);
+
+test('renders Handlebars templates, blocks, and unescaped file names', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'accendo-handlebars-'));
+  temporaryDirectories.push(root);
+  const source = path.join(root, 'template');
+  const destination = path.join(root, 'output');
+  await mkdir(source);
+  await writeFile(
+    path.join(source, '{{projectName}}.txt.hbs'),
+    '{{#if enabled}}Hello {{projectName}}{{/if}}',
+  );
+
+  await renderTemplate(
+    source,
+    destination,
+    {
+      projectName: 'sample-app',
+      enabled: true,
+    },
+    'handlebars',
+  );
+
+  expect(await readFile(path.join(destination, 'sample-app.txt'), 'utf8')).toBe(
+    'Hello sample-app',
+  );
+});
+
+test('rejects Handlebars paths that escape the output directory', async () => {
+  const root = await mkdtemp(
+    path.join(os.tmpdir(), 'accendo-handlebars-path-'),
+  );
+  temporaryDirectories.push(root);
+  const source = path.join(root, 'template');
+  const destination = path.join(root, 'output');
+  await mkdir(source);
+  await writeFile(path.join(source, '{{path}}.txt'), 'no');
+
+  await expect(
+    renderTemplate(source, destination, { path: '../outside' }, 'handlebars'),
+  ).rejects.toThrow('Template path escapes destination');
 });
 
 test('rejects rendered paths that escape the output directory', async () => {

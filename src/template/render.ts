@@ -8,7 +8,8 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import path from 'node:path';
-import type { TemplateAnswers } from './types.js';
+import Handlebars from 'handlebars';
+import type { TemplateAnswers, TemplateRenderer } from './types.js';
 
 const textExtensions = new Set([
   '.cjs',
@@ -28,7 +29,7 @@ const textExtensions = new Set([
 
 const templateSuffix = '.hbs';
 
-function renderText(template: string, answers: TemplateAnswers): string {
+function renderSimple(template: string, answers: TemplateAnswers): string {
   return template.replace(/{{\s*([\w]+)\s*}}/g, (match, key: string) => {
     const value = answers[key];
     if (value === undefined) {
@@ -39,8 +40,35 @@ function renderText(template: string, answers: TemplateAnswers): string {
   });
 }
 
-function renderPath(templatePath: string, answers: TemplateAnswers): string {
-  return renderText(templatePath, answers).replace(/\.hbs$/, '');
+function renderText(
+  template: string,
+  answers: TemplateAnswers,
+  renderer: TemplateRenderer,
+  escape = true,
+): string {
+  if (renderer === 'simple') {
+    return renderSimple(template, answers);
+  }
+
+  try {
+    const compiled = Handlebars.compile(template, { noEscape: !escape });
+    return compiled(answers);
+  } catch (error) {
+    throw new Error(`Failed to render Handlebars template: ${String(error)}`, {
+      cause: error,
+    });
+  }
+}
+
+function renderPath(
+  templatePath: string,
+  answers: TemplateAnswers,
+  renderer: TemplateRenderer,
+): string {
+  return renderText(templatePath, answers, renderer, false).replace(
+    /\.hbs$/,
+    '',
+  );
 }
 
 function isWithin(parent: string, candidate: string): boolean {
@@ -58,6 +86,7 @@ async function renderDirectory(
   destination: string,
   answers: TemplateAnswers,
   templateRoot: string,
+  renderer: TemplateRenderer,
 ): Promise<void> {
   for (const entry of await readdir(source, { withFileTypes: true })) {
     if (source === templateRoot && entry.name === 'template.json') {
@@ -65,7 +94,7 @@ async function renderDirectory(
     }
 
     const sourcePath = path.join(source, entry.name);
-    const renderedName = renderPath(entry.name, answers);
+    const renderedName = renderPath(entry.name, answers, renderer);
     const destinationPath = path.resolve(destination, renderedName);
 
     if (!isWithin(destination, destinationPath)) {
@@ -80,7 +109,13 @@ async function renderDirectory(
 
     if (entry.isDirectory()) {
       await mkdir(destinationPath, { recursive: true });
-      await renderDirectory(sourcePath, destinationPath, answers, templateRoot);
+      await renderDirectory(
+        sourcePath,
+        destinationPath,
+        answers,
+        templateRoot,
+        renderer,
+      );
       continue;
     }
 
@@ -88,14 +123,14 @@ async function renderDirectory(
 
     if (entry.name.endsWith(templateSuffix)) {
       const content = await readFile(sourcePath, 'utf8');
-      await writeFile(destinationPath, renderText(content, answers));
+      await writeFile(destinationPath, renderText(content, answers, renderer));
       continue;
     }
 
     const extension = path.extname(entry.name).toLowerCase();
     if (textExtensions.has(extension) && !entry.name.startsWith('.')) {
       const content = await readFile(sourcePath, 'utf8');
-      await writeFile(destinationPath, renderText(content, answers));
+      await writeFile(destinationPath, renderText(content, answers, renderer));
       continue;
     }
 
@@ -107,6 +142,7 @@ export async function renderTemplate(
   templateDirectory: string,
   destination: string,
   answers: TemplateAnswers,
+  renderer: TemplateRenderer = 'simple',
 ): Promise<void> {
   const templateRoot = path.resolve(templateDirectory);
   const outputDirectory = path.resolve(destination);
@@ -117,7 +153,13 @@ export async function renderTemplate(
   }
 
   await mkdir(outputDirectory, { recursive: true });
-  await renderDirectory(templateRoot, outputDirectory, answers, templateRoot);
+  await renderDirectory(
+    templateRoot,
+    outputDirectory,
+    answers,
+    templateRoot,
+    renderer,
+  );
 }
 
 export async function prepareDestination(destination: string): Promise<void> {

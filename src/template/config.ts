@@ -23,6 +23,16 @@ export async function loadManifest(path: string): Promise<TemplateManifest> {
 
   const manifest = parsed as Partial<TemplateManifest>;
   if (
+    manifest.renderer !== undefined &&
+    manifest.renderer !== 'simple' &&
+    manifest.renderer !== 'handlebars'
+  ) {
+    throw new Error(
+      `Invalid template renderer "${String(manifest.renderer)}": ${path}`,
+    );
+  }
+
+  if (
     manifest.schemaVersion !== 1 ||
     typeof manifest.id !== 'string' ||
     typeof manifest.name !== 'string' ||
