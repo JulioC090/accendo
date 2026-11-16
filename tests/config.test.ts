@@ -22,46 +22,31 @@ async function writeManifest(renderer?: string): Promise<string> {
     manifestPath,
     JSON.stringify({
       schemaVersion: 1,
-      id: 'test',
+      id: 'accendo-test-template',
       name: 'Test',
       description: 'Test template',
       ...(renderer === undefined ? {} : { renderer }),
-      prompts: [],
+      prompts: [
+        {
+          name: 'projectName',
+          type: 'input',
+          message: 'Project name',
+          required: true,
+        },
+      ],
     }),
   );
   return manifestPath;
 }
 
-const templatePath = new URL(
-  '../templates/typescript-cli/template.json',
-  import.meta.url,
-);
-const handlebarsTemplatePath = new URL(
-  '../templates/handlebars-example/template.json',
-  import.meta.url,
-);
+test('loads a template manifest with its prompts and default renderer', async () => {
+  const manifest = await loadManifest(await writeManifest());
 
-test('loads the TypeScript CLI template manifest', async () => {
-  const manifest = await loadManifest(templatePath.pathname);
-
-  expect(manifest.id).toBe('typescript-cli');
+  expect(manifest.id).toBe('accendo-test-template');
   expect(manifest.prompts.map((prompt) => prompt.name)).toEqual([
     'projectName',
-    'description',
-    'binName',
   ]);
   expect(manifest.renderer).toBeUndefined();
-});
-
-test('loads the Handlebars example manifest', async () => {
-  const manifest = await loadManifest(handlebarsTemplatePath.pathname);
-
-  expect(manifest.id).toBe('handlebars-example');
-  expect(manifest.renderer).toBe('handlebars');
-  expect(manifest.prompts.map((prompt) => prompt.name)).toEqual([
-    'projectName',
-    'includeGreeting',
-  ]);
 });
 
 test.each(['simple', 'handlebars'] as const)(

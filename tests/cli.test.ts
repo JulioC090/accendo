@@ -46,13 +46,16 @@ test('dispatches list and create to their actions', async () => {
   const { actions, program } = makeCli();
 
   await program.parseAsync(['list'], { from: 'user' });
-  await program.parseAsync(['create', 'typescript-cli', './my-cli'], {
-    from: 'user',
-  });
+  await program.parseAsync(
+    ['create', 'accendo-typescript-cli-template', './my-cli'],
+    {
+      from: 'user',
+    },
+  );
 
   expect(actions.listTemplates).toHaveBeenCalledOnce();
   expect(actions.createProject).toHaveBeenCalledWith(
-    'typescript-cli',
+    'accendo-typescript-cli-template',
     './my-cli',
   );
 });
@@ -60,16 +63,21 @@ test('dispatches list and create to their actions', async () => {
 test('rejects missing and extra command arguments', async () => {
   const missing = makeCli().program;
   await expect(
-    missing.parseAsync(['create', 'typescript-cli'], { from: 'user' }),
+    missing.parseAsync(['create', 'accendo-typescript-cli-template'], {
+      from: 'user',
+    }),
   ).rejects.toMatchObject({
     code: 'commander.missingArgument',
   });
 
   const extra = makeCli().program;
   await expect(
-    extra.parseAsync(['create', 'typescript-cli', './my-cli', 'extra'], {
-      from: 'user',
-    }),
+    extra.parseAsync(
+      ['create', 'accendo-typescript-cli-template', './my-cli', 'extra'],
+      {
+        from: 'user',
+      },
+    ),
   ).rejects.toMatchObject({
     code: 'commander.excessArguments',
   });

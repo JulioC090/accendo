@@ -7,7 +7,7 @@ import tsEslint from 'typescript-eslint';
 export default [
   // Directories ignored by ESLint
   {
-    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'templates/**'],
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**'],
   },
 
   // Recommended JavaScript configuration

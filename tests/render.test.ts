@@ -52,9 +52,24 @@ test.each([
   async (includeGreeting, expected) => {
     const root = await mkdtemp(path.join(os.tmpdir(), 'accendo-hbs-example-'));
     temporaryDirectories.push(root);
-    const source = new URL('../templates/handlebars-example/', import.meta.url)
-      .pathname;
+    const source = path.join(root, 'template');
     const destination = path.join(root, 'output');
+    await mkdir(source);
+    await writeFile(
+      path.join(source, 'template.json'),
+      JSON.stringify({
+        schemaVersion: 1,
+        id: 'accendo-handlebars-example-template',
+        name: 'Handlebars Example',
+        description: 'Test fixture',
+        renderer: 'handlebars',
+        prompts: [],
+      }),
+    );
+    await writeFile(
+      path.join(source, 'README.md.hbs'),
+      '# {{projectName}}\n\n{{#if includeGreeting}}Hello from the Handlebars example!{{else}}The greeting was disabled for this project.{{/if}}',
+    );
     const manifest = await loadManifest(path.join(source, 'template.json'));
     await renderTemplate(
       source,
