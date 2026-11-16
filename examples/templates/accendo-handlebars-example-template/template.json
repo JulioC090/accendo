@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "accendo-handlebars-example-template",
+  "name": "Handlebars Example",
+  "description": "Small template demonstrating Handlebars interpolation and conditionals.",
+  "renderer": "handlebars",
+  "prompts": [
+    {
+      "name": "projectName",
+      "type": "input",
+      "message": "Project name",
+      "default": "my-handlebars-project",
+      "required": true,
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    {
+      "name": "includeGreeting",
+      "type": "confirm",
+      "message": "Include the greeting?",
+      "default": true
+    }
+  ]
+}

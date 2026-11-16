@@ -17,6 +17,6 @@ A CLI coleta os valores declarados no `template.json` do template e copia os arq
 
 ## Templates
 
-Os templates são mantidos exclusivamente no repositório GitHub [`JulioC090/accendo-templates`](https://github.com/JulioC090/accendo-templates), um por subdiretório no formato `accendo-<nome>-template`. Cada subdiretório deve conter um `template.json` na raiz, e o `id` do manifest deve coincidir com o ID do catálogo, por exemplo `accendo-typescript-cli-template`. A CLI baixa as fontes `gh:` usando `giget` e valida essa correspondência. Os templates não são incluídos localmente neste repositório; `list` e `create` dependem de os diretórios remotos estarem publicados.
+Os templates principais são mantidos no repositório GitHub [`JulioC090/accendo-templates`](https://github.com/JulioC090/accendo-templates), um por subdiretório no formato `accendo-<nome>-template`. A CLI baixa as fontes `gh:` usando `giget` e valida que o `id` do `template.json` corresponde ao ID do catálogo. Este projeto também inclui um exemplo local em `examples/templates/accendo-handlebars-example-template`, disponível na CLI como `accendo-handlebars-example-template`; ele demonstra `{{#if}}` e gera `README.md` a partir de `README.md.hbs`. Os demais templates remotos dependem de seus diretórios estarem publicados no GitHub.
 
 A configuração é declarativa e não executa código do template. Integração com Plop pode ser adicionada como backend explícito para templates que precisem executar lógica JavaScript; nesse caso, só use templates confiáveis.
