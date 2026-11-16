@@ -5,9 +5,12 @@ CLI e catálogo de templates configuráveis para iniciar novos projetos.
 ## Comandos
 
 ```bash
+pnpm dev --help
 pnpm dev list
 pnpm dev create typescript-cli ./meu-cli
 ```
+
+A CLI oferece `--help` e `--version`; os comandos e argumentos inválidos exibem uma mensagem de erro e encerram com código diferente de zero.
 
 A CLI coleta os valores declarados no `template.json` do template, copia os arquivos para o destino e renderiza as expressões `{{nomeDaVariavel}}` em arquivos de texto. Arquivos terminados em `.hbs` também têm a extensão removida na saída. O diretório de destino deve ainda não existir; dependências não são instaladas automaticamente.
 
