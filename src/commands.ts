@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { downloadTemplate } from 'giget';
-import { templates } from './catalog.js';
+import { findTemplateEntry, templates } from './catalog.js';
 import { loadManifest } from './template/config.js';
 import { collectAnswers } from './template/prompts.js';
 import {
@@ -15,7 +15,7 @@ import {
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url));
 
 async function resolveTemplate(id: string, workDirectory: string) {
-  const entry = templates.find((template) => template.id === id);
+  const entry = findTemplateEntry(id);
   if (!entry) {
     throw new Error(
       `Unknown template "${id}". Run "accendo list" to see available templates.`,
@@ -35,9 +35,9 @@ async function resolveTemplate(id: string, workDirectory: string) {
   }
 
   const manifest = await loadManifest(path.join(directory, 'template.json'));
-  if (manifest.id !== id) {
+  if (manifest.id !== entry.id) {
     throw new Error(
-      `Template manifest id "${manifest.id}" does not match catalog id "${id}".`,
+      `Template manifest id "${manifest.id}" does not match catalog id "${entry.id}".`,
     );
   }
 

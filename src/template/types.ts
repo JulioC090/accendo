@@ -21,6 +21,7 @@ export type TemplateManifest = {
 export type TemplateEntry = {
   id: string;
   source: string;
+  aliases?: string[];
 };
 
 export type TemplateAnswers = Record<string, string | boolean>;
